@@ -56,11 +56,12 @@ def experiment(
 
     # load dataset
     path_tar = variant['path_tar']
-    path_src = [variant['path_2']]
+    path_src = [variant['path_src']]
 
 
-    src_list = list
-    tar_list = list()
+    src_list_idm = list()
+    src_list_dt = list()
+
     for path in path_src:
         with open(path, 'rb') as f:
             loader = pickle.load(f)
@@ -68,7 +69,9 @@ def experiment(
         numpy_loader_i['rewards'] = loader['rewards'].numpy()
         numpy_loader_i['observations'] = loader['observations'].numpy()
         numpy_loader_i['actions'] = loader['actions'].numpy()
-        src_list.append(numpy_loader_i)
+        src_list_dt.append(numpy_loader_i)
+        src_list_idm.append(numpy_loader_i)
+
 
     with open(path_tar, 'rb') as f:
         loader = pickle.load(f)
@@ -77,7 +80,7 @@ def experiment(
     numpy_loader_tar['observations'] = loader['observations'].numpy()
     numpy_loader_tar['actions'] = loader['actions'].numpy()
 
-    action_limited = True
+    action_limited = variant['action_limited']
     keep_portion=variant['keep_portion']+1
     if action_limited:
         indices = np.random.choice(numpy_loader_tar['actions'].shape[0],
@@ -86,22 +89,20 @@ def experiment(
         loader_idm['actions'] = np.delete(numpy_loader_tar['actions'], indices, axis=0)
         loader_idm['observations'] = np.delete(numpy_loader_tar['observations'], indices, axis=0)
         loader_idm['rewards'] = np.delete(numpy_loader_tar['rewards'], indices, axis=0)
-        loader_idm['actions'][indices,:] = 4 #NULL ACTION
+        numpy_loader_tar['actions'][indices,:] = 4 #NULL ACTION
 
-    tar_list.append(numpy_loader_tar)
+    src_list_dt.append(numpy_loader_tar)
 
-    numpy_list = tar_list.append(src_list)
-    loader_idm = [loader_idm]
-    numpy_list_idm = loader_idm.appned(src_list)
+    src_list_idm.append(loader_idm)
+
 
     numpy_loader = {}
     for k in numpy_loader_i.keys():
-        numpy_loader[k] = np.concatenate(list(d[k] for d in numpy_list))
+        numpy_loader[k] = np.concatenate(list(d[k] for d in src_list_dt))
 
     numpy_loader_idm = {}
     for k in numpy_loader_i.keys():
-        numpy_loader_idm[k] = np.concatenate(list(d[k] for d in numpy_list_idm))
-
+        numpy_loader_idm[k] = np.concatenate(list(d[k] for d in src_list_idm))
 
     # save all path information into separate lists
     mode = variant.get('mode', 'normal')
@@ -481,7 +482,7 @@ if __name__ == '__main__':
     parser.add_argument('--K', type=int, default=20)
     parser.add_argument('--pct_traj', type=float, default=1.)
     parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--keep_portion', type=int, default=64)
+    parser.add_argument('--keep_portion', type=int, default=10)
     parser.add_argument('--seed', type=int, default=64)
     parser.add_argument('--model_type', type=str, default='alpt')  # dt for decision transformer, bc for behavior cloning
     parser.add_argument('--embed_dim', type=int, default=128)
@@ -497,7 +498,8 @@ if __name__ == '__main__':
     parser.add_argument('--num_steps_per_iter', type=int, default=10)
     parser.add_argument('--device', type=str, default='cpu')
     parser.add_argument('--log_to_wandb', '-w', type=bool, default=False)
-    
+    parser.add_argument('--action_limited', type=bool, default=True)
+
     args = parser.parse_args()
 
     experiment('gym-experiment', variant=vars(args))
