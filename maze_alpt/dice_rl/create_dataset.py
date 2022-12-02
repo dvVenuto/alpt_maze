@@ -60,8 +60,6 @@ def get_onpolicy_dataset(load_dir, env_name, tabular_obs, max_trajectory_length,
   tf_env, tf_policy = env_policies.get_env_and_policy(
       load_dir, env_name, alpha, env_seed=seed, tabular_obs=tabular_obs)
 
-  print(tf_env)
-  print(tf_env.reset())
 
   dataset = tf_agents_onpolicy_dataset.TFAgentsOnpolicyDataset(
       tf_env, tf_policy,
@@ -148,9 +146,7 @@ def main(argv):
     print('per episode avg on offpolicy data', estimate)
 
   print('Saving dataset to %s.' % directory)
-  if not tf.io.gfile.isdir(directory):
-    tf.io.gfile.makedirs(directory)
-  write_dataset.save(directory)
+
 
   data = write_dataset.get_all_episodes()
   writer= dict()
@@ -164,21 +160,6 @@ def main(argv):
   with tf.io.gfile.GFile(pickle_filename, 'w') as f:
     pickle.dump(writer, f)
 
-
-
-
-  print('Loading dataset.')
-  new_dataset = Dataset.load(directory)
-  print('num loaded steps', new_dataset.num_steps)
-  print('num loaded total steps', new_dataset.num_total_steps)
-  print('num loaded episodes', new_dataset.num_episodes)
-  print('num loaded total episodes', new_dataset.num_total_episodes)
-
-  estimate = estimator_lib.get_fullbatch_average(new_dataset)
-  print('per step avg on saved and loaded offpolicy data', estimate)
-  estimate = estimator_lib.get_fullbatch_average(new_dataset,
-                                                 by_steps=False)
-  print('per episode avg on saved and loaded offpolicy data', estimate)
 
   print('Done!')
 

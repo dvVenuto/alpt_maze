@@ -7,7 +7,6 @@ import tensorflow.compat.v2 as tf
 from gym import spaces
 from gym.utils import seeding
 
-import utils.common as common_utils
 from environments.gridworld.navigation import Navigation
 
 

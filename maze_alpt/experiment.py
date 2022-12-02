@@ -55,33 +55,52 @@ def experiment(
     act_dim = 1
 
     # load dataset
-    dataset_paths = [variant['path_1'], variant['path_2']]
+    path_tar = variant['path_tar']
+    path_src = [variant['path_2']]
 
 
-
-    numpy_list = list()
-    for path in dataset_paths:
+    src_list = list
+    tar_list = list()
+    for path in path_src:
         with open(path, 'rb') as f:
             loader = pickle.load(f)
         numpy_loader_i = dict()
         numpy_loader_i['rewards'] = loader['rewards'].numpy()
         numpy_loader_i['observations'] = loader['observations'].numpy()
         numpy_loader_i['actions'] = loader['actions'].numpy()
-        numpy_list.append(numpy_loader_i)
-    numpy_loader = {}
-    for k in numpy_loader_i.keys():
-        numpy_loader[k] = np.concatenate(list(d[k] for d in numpy_list))
+        src_list.append(numpy_loader_i)
+
+    with open(path_tar, 'rb') as f:
+        loader = pickle.load(f)
+    numpy_loader_tar = dict()
+    numpy_loader_tar['rewards'] = loader['rewards'].numpy()
+    numpy_loader_tar['observations'] = loader['observations'].numpy()
+    numpy_loader_tar['actions'] = loader['actions'].numpy()
 
     action_limited = True
     keep_portion=variant['keep_portion']+1
     if action_limited:
-        indices = np.random.choice(numpy_loader['actions'].shape[0],
-                                   replace=False, size=int(numpy_loader['actions'].shape[0]-keep_portion))
-        numpy_loader_idm = dict()
-        numpy_loader_idm['actions'] = np.delete(numpy_loader['actions'], indices, axis=0)
-        numpy_loader_idm['observations'] = np.delete(numpy_loader['observations'], indices, axis=0)
-        numpy_loader_idm['rewards'] = np.delete(numpy_loader['rewards'], indices, axis=0)
-        numpy_loader['actions'][indices,:] = 4
+        indices = np.random.choice(numpy_loader_tar['actions'].shape[0],
+                                   replace=False, size=int(numpy_loader_tar['actions'].shape[0]-keep_portion))
+        loader_idm = dict()
+        loader_idm['actions'] = np.delete(numpy_loader_tar['actions'], indices, axis=0)
+        loader_idm['observations'] = np.delete(numpy_loader_tar['observations'], indices, axis=0)
+        loader_idm['rewards'] = np.delete(numpy_loader_tar['rewards'], indices, axis=0)
+        loader_idm['actions'][indices,:] = 4 #NULL ACTION
+
+    tar_list.append(numpy_loader_tar)
+
+    numpy_list = tar_list.append(src_list)
+    loader_idm = [loader_idm]
+    numpy_list_idm = loader_idm.appned(src_list)
+
+    numpy_loader = {}
+    for k in numpy_loader_i.keys():
+        numpy_loader[k] = np.concatenate(list(d[k] for d in numpy_list))
+
+    numpy_loader_idm = {}
+    for k in numpy_loader_i.keys():
+        numpy_loader_idm[k] = np.concatenate(list(d[k] for d in numpy_list_idm))
 
 
     # save all path information into separate lists
@@ -456,8 +475,8 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='normal')  # normal for standard setting, delayed for sparse
     parser.add_argument('--wall_type', type=str, default="blocks:10")  # medium, medium-replay, medium-expert, expert
     parser.add_argument('--maze_size', type=int, default='10')  # normal for standard setting, delayed for sparse
-    parser.add_argument('--path_1', type=str, default='dice_rl/maze_pickle')  # normal for standard setting, delayed for sparse
-    parser.add_argument('--path_2', type=str, default='dice_rl/maze_pickle')  # normal for standard setting, delayed for sparse
+    parser.add_argument('--path_src', type=str, default='dice_rl/maze_pickle')  # normal for standard setting, delayed for sparse
+    parser.add_argument('--path_tar', type=str, default='dice_rl/maze_pickle')  # normal for standard setting, delayed for sparse
 
     parser.add_argument('--K', type=int, default=20)
     parser.add_argument('--pct_traj', type=float, default=1.)
