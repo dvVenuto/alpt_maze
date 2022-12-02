@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: dice-rl
-Version: 0.0.0
-Summary: A library for using distribution correction estimation in reinforcement learning.
-Home-page: https://github.com/google-research/dice_rl
-Author: Google LLC
-Author-email: no-reply@google.com
-License: Apache 2.0
-License-File: LICENSE
