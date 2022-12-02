@@ -27,6 +27,7 @@ python create_dataset.py --env_name 'maze:tunnel:20' --seed 0 --num_trajectory 1
 ```
 
 maze:10-blocks:20 refers to a maze with 10 blocks and shape 20x20.
+
 maze:tunnel:20 refers to the tunneled maze of shape 20x20.
 
 You can create multiple maze configurations and save them in seperate directories for later use with ALPT.
