@@ -35,8 +35,7 @@ You can create multiple maze configurations and save them in seperate directorie
 To run ALPT on a target environment of maze:10-blocks:20 with a source environment of maze:tunnel:20, you can run:
 
 ```
-python experiment.py --wall_type 'blocks:10' --maze_size 20 --path_tar 'path/to/your/maze_1.pkl' --path_src 'path/to/your/maze_2.pkl' --model_type 'alpt'
---keep_portion 400
+python experiment.py --wall_type 'blocks:10' --maze_size 20 --path_tar 'path/to/your/maze_1.pkl' --path_src 'path/to/your/maze_2.pkl' --model_type 'alpt' --keep_portion 400
 ```
 
 ## License
